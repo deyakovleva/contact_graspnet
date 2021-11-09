@@ -305,7 +305,11 @@ def load_available_input_data(p, K=None):
     if K is not None:
         if isinstance(K,str):
             cam_K = eval(K)
-        cam_K = np.array(K).reshape(3,3)
+            #print(cam_K)
+            #print(K)
+        cam_K = np.reshape(cam_K,(3,3)) # cam_K = np.array(K).reshape(3,3) was, but I have corrected
+        #print(cam_K)
+
 
     if '.np' in p:
         data = np.load(p, allow_pickle=True)
