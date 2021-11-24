@@ -1,4 +1,5 @@
 <launch>
+
   <!-- Get arguments -->
   <arg name="ckpt_dir" default="$(find contact_graspnet_planner)checkpoints/scene_test_2048_bs3_hor_sigma_001" doc="Log dir [default: checkpoints/scene_test_2048_bs3_hor_sigma_001]" />
   <arg name="z_min" default="0.2" doc="Z min value threshold to crop the input point cloud" />
@@ -11,6 +12,7 @@
 
   <!-- Run Contact-GraspNet -->
   <node name="contact_graspnet_planner" pkg="contact_graspnet_planner" type="ros_node.py" output="screen" >
+
       <param name="ckpt_dir" type="str" value="$(arg ckpt_dir)" />
       <param name="z_min" type="double" value="$(arg z_min)" />
       <param name="z_max" type="double" value="$(arg z_max)" />
@@ -19,5 +21,8 @@
       <param name="skip_border_objects" type="bool" value="$(arg skip_border_objects)" />
       <param name="forward_passes" type="int" value="$(arg forward_passes)" />
       <param name="segmap_id" type="int" value="$(arg segmap_id)" />
+
+
+
   </node>
 </launch>

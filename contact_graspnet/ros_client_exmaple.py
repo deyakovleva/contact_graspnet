@@ -38,6 +38,8 @@ if __name__ == '__main__':
     # get sample data
     sample_data_path = FLAGS.np_path
     segmap, rgb, depth, cam_K, pc_full, pc_colors = load_available_input_data(sample_data_path, K=None)
+    print("depth from file")
+    print(depth)
     rospy.loginfo("Load exmaple datas: {}".format(sample_data_path))
 
     # Convert depth image to point clouds --> need `GraspEstimator`
@@ -53,6 +55,8 @@ if __name__ == '__main__':
         skip_border_objects=False,
         z_range=[0.2, 1.8],
         )
+    print("pc_full from extractor")
+    print(pc_full)
 
     # conver to ros input data
     cv_bridge = CvBridge()
@@ -65,7 +69,7 @@ if __name__ == '__main__':
     # request service to server
     rospy.loginfo('Start grasp_planner_client')
     service_name = 'grasp_planner'
-    rospy.loginfo('Wait for the grasp_plnnaer_server')
+    rospy.loginfo('Wait for the grasp_planner_server')
     rospy.wait_for_service(service_name)
     try:
         rospy.loginfo("Request Contact-GraspNet grasp planning")

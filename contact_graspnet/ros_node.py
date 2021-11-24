@@ -3,6 +3,7 @@
 import os
 import sys
 import time
+import glob
 
 import numpy as np
 from scipy.spatial.transform import Rotation as R
@@ -18,7 +19,9 @@ import config_utils
 from contact_grasp_estimator import GraspEstimator
 
 import rospy
+import cv2
 from cv_bridge import CvBridge
+from sensor_msgs.msg import Image
 from contact_graspnet_planner.msg import ContactGrasp
 from contact_graspnet_planner.srv import ContactGraspNetPlanner
 from contact_graspnet_planner.srv import ContactGraspNetPlannerResponse
@@ -40,11 +43,28 @@ def imgmsg_to_cv2(img_msg):
         `numpy.ndarray`: OpenCV image
     """
     # check data type
+    res = None
+
     if img_msg.encoding == '8UC3':
         dtype = np.uint8
         n_channels = 3
     elif img_msg.encoding == '32FC1':
         dtype = np.float32
+        n_channels = 1
+    elif img_msg.encoding == 'rgb8':
+        dtype = np.uint8
+        n_channels = 3
+        # img_msg = CvBridge.imgmsg_to_cv2(img_msg, desired_encoding='8UC3')
+    elif img_msg.encoding == '16UC1':
+        # img_msg = CvBridge.imgmsg_to_cv2(img_msg, desired_encoding='32FC1')
+        dtype = np.float32
+        n_channels = 1
+        res = cv2.normalize(img_msg, res, 0, 1, cv2.NORM_MINMAX)
+        img_msg = res
+        # print('img msg posle')
+        # print(img_msg)
+    elif img_msg.encoding == '8UC1':
+        dtype = np.uint8
         n_channels = 1
     else:
         raise NotImplementedError('custom imgmsg_to_cv2 does not support {} encoding type'.format(img_msg.encoding))
@@ -113,8 +133,11 @@ class GraspPlannerServer(object):
 
         # unpack request massage
         color_im, depth_im, segmask, camera_intr = self.read_images(req)
-
-        if np.mean(segmask) == -1:
+        print(segmask)
+        # print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+        # print(np.size(segmask))
+        
+        if np.mean(segmask) == -1 or np.size(segmask) == 1:
             segmask = None
             rospy.logwarn('No segmentation mask. Generate grasp with full scene.')
             if (self.local_regions or self.filter_grasps):
@@ -125,6 +148,7 @@ class GraspPlannerServer(object):
 
         # Convert depth image to point clouds
         rospy.loginfo('Converting depth to point cloud(s)...')
+        
         pc_full, pc_segments, pc_colors = self.grasp_estimator.extract_point_clouds(
             depth=depth_im,
             segmap=segmask,
@@ -133,6 +157,11 @@ class GraspPlannerServer(object):
             skip_border_objects=self.skip_border_objects,
             z_range=self.z_range,
             )
+
+        print('pc from rosnode')
+        print(pc_full)
+        print(pc_segments)
+        print(pc_colors)
 
         #############
         # Gen Grasp #
@@ -166,6 +195,11 @@ class GraspPlannerServer(object):
         return grasp_resp
 
     def read_images(self, req):
+
+        # responded with an error: b"error processing request: unsupported operand type(s) for /: 'Image' and 'int'"
+
+        # responded with an error: b"error processing request: name 'color_im' is not defined"
+
         """Reads images from a ROS service request.
 
         Parameters
@@ -182,12 +216,29 @@ class GraspPlannerServer(object):
         raw_camera_info = req.camera_info
 
         camera_intr = np.array([raw_camera_info.K]).reshape((3, 3))
+        bridge = CvBridge()
+        res = None
 
         try:
-            color_im = imgmsg_to_cv2(raw_color)
-            depth_im = imgmsg_to_cv2(raw_depth)
-            segmask = imgmsg_to_cv2(raw_segmask)
+
+            color_im = bridge.imgmsg_to_cv2(raw_color)
+            # depth_im = bridge.imgmsg_to_cv2(raw_depth, '32FC1')
+            segmask = bridge.imgmsg_to_cv2(raw_segmask)
+
+            if raw_depth.encoding == '32FC1':
+                depth_cv = bridge.imgmsg_to_cv2(raw_depth)
+            elif raw_depth.encoding == '16UC1':
+                depth_cv = bridge.imgmsg_to_cv2(
+                    raw_depth).copy().astype(np.float32)
+                depth_cv /= 1000.0
+            else:
+                rospy.logerr_throttle(
+                    1, 'Unsupported depth type. Expected 16UC1 or 32FC1, got {}'.format(
+                        raw_depth.encoding))
+            depth_im = depth_cv.copy()
+
         except NotImplementedError as e:
+            rospy.loginfo("Error cathed")
             rospy.logerr(e)
 
         return (color_im, depth_im, segmask, camera_intr)
