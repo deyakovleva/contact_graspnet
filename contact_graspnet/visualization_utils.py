@@ -96,7 +96,11 @@ def visualize_grasps(full_pc, pred_grasps_cam, scores, plot_opencv_cam=False, pc
     for i,k in enumerate(pred_grasps_cam):
         if np.any(pred_grasps_cam[k]):
             gripper_openings_k = np.ones(len(pred_grasps_cam[k]))*gripper_width if gripper_openings is None else gripper_openings[k]
-            if len(pred_grasps_cam) > 1:
+
+            # print('pred_grasps_cam') 
+            # print(len(pred_grasps_cam))
+
+            if (len(pred_grasps_cam) > 1 or len(pred_grasps_cam) == 1):# added ==1, in order to create best grasp for only one segmented obj
                 draw_grasps(pred_grasps_cam[k], np.eye(4), color=colors[i], gripper_openings=gripper_openings_k)    
                 draw_grasps([pred_grasps_cam[k][np.argmax(scores[k])]], np.eye(4), color=colors2[k], 
                             gripper_openings=[gripper_openings_k[np.argmax(scores[k])]], tube_radius=0.0025)    

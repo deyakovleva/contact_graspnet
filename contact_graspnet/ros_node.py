@@ -43,7 +43,6 @@ def imgmsg_to_cv2(img_msg):
         `numpy.ndarray`: OpenCV image
     """
     # check data type
-    res = None
 
     if img_msg.encoding == '8UC3':
         dtype = np.uint8
@@ -133,11 +132,11 @@ class GraspPlannerServer(object):
 
         # unpack request massage
         color_im, depth_im, segmask, camera_intr = self.read_images(req)
-        print(segmask)
+        # print(segmask)
         # print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
         # print(np.size(segmask))
         
-        if np.mean(segmask) == -1 or np.size(segmask) == 1:
+        if np.mean(segmask) == -1: #or np.size(segmask) == 1:
             segmask = None
             rospy.logwarn('No segmentation mask. Generate grasp with full scene.')
             if (self.local_regions or self.filter_grasps):
@@ -221,6 +220,10 @@ class GraspPlannerServer(object):
 
         try:
 
+            # color_im = imgmsg_to_cv2(raw_color)
+            # depth_im = imgmsg_to_cv2(raw_depth)
+            # segmask = imgmsg_to_cv2(raw_segmask)
+            
             color_im = bridge.imgmsg_to_cv2(raw_color)
             # depth_im = bridge.imgmsg_to_cv2(raw_depth, '32FC1')
             segmask = bridge.imgmsg_to_cv2(raw_segmask)
@@ -236,6 +239,7 @@ class GraspPlannerServer(object):
                     1, 'Unsupported depth type. Expected 16UC1 or 32FC1, got {}'.format(
                         raw_depth.encoding))
             depth_im = depth_cv.copy()
+            
 
         except NotImplementedError as e:
             rospy.loginfo("Error cathed")

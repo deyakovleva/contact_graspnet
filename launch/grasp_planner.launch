@@ -12,7 +12,6 @@
 
   <!-- Run Contact-GraspNet -->
   <node name="contact_graspnet_planner" pkg="contact_graspnet_planner" type="ros_node.py" output="screen" >
-
       <param name="ckpt_dir" type="str" value="$(arg ckpt_dir)" />
       <param name="z_min" type="double" value="$(arg z_min)" />
       <param name="z_max" type="double" value="$(arg z_max)" />

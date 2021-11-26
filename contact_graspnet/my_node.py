@@ -47,8 +47,12 @@ class ImageListener:
         self.im = None
         self.depth = None
         self.depth_ros = None
+        self.depth_crp = None
+        self.depth_crp_ros = None
         self.depth_encoding = None
         self.camera_info_ros = None
+        # self.seg_ros = None
+        # self.seg = None
         self.segmask = Image()
         self.resp = ContactGraspNetPlannerResponse()
         self.pc_full = None
@@ -64,10 +68,13 @@ class ImageListener:
         rgb_sub = message_filters.Subscriber('/camera/color/image_raw',
                                              Image, queue_size=10)
 
-        depth_sub = message_filters.Subscriber('/camera/depth/image_rect_raw',
+        depth_sub = message_filters.Subscriber('/camera/aligned_depth_to_color/image_raw',
                                                Image, queue_size=10)
         camera_sub = message_filters.Subscriber('/camera/depth/camera_info',
                                                CameraInfo, queue_size=10)
+
+        depth_crop_sub = rospy.Subscriber('/depth_masked',
+                                               Image, self.callback_dep, queue_size=10)
 
         my_service = rospy.Service('/get_grasps', Trigger, self.trigger_response)
         
@@ -142,6 +149,24 @@ class ImageListener:
             self.segmask.width = 1
             self.segmask.step = 1
             self.segmask.data = [1]
+            
+    
+    def callback_dep(self, depth_crop):
+
+        #seg = self.cv_brdg.imgmsg_to_cv2(segmask)
+
+        with lock:
+            #self.seg=seg.copy()
+            self.depth_crp_ros = depth_crop
+
+    # def callback_seg(self, segmask):
+
+    #     #seg = self.cv_brdg.imgmsg_to_cv2(segmask)
+    #     print('segmask')
+    #     print(segmask)
+    #     with lock:
+    #         #self.seg=seg.copy()
+    #         self.seg_ros = segmask
 
     
     def run_proc(self):
@@ -159,7 +184,8 @@ class ImageListener:
 
     def start_srv(self):
 
-        if (self.im_ros == None or self.depth_ros == None):
+        # if (self.im_ros == None and self.depth_ros == None and self.seg_ros == None):
+        if (self.im_ros == None and self.depth_crp_ros == None):
             print("No valid msg")
             return
 
@@ -175,7 +201,7 @@ class ImageListener:
             # rospy.loginfo("smth") # works 
             self.resp = grasp_planner(
                     self.im_ros,
-                    self.depth_ros,
+                    self.depth_crp_ros,
                     self.camera_info_ros,
                     self.segmask
                     )
@@ -272,13 +298,13 @@ if __name__ == '__main__':
                 scores[instance_id] = scores_list[indices]
                 contact_pts[instance_id] = contact_pts_list[indices]
             
+            # print('scores')
+            # print(scores)
+            
             show_image(listener.im, None)
             visualize_grasps(pc_full, pred_grasps_cam, scores, plot_opencv_cam=True, pc_colors=pc_color)
             listener.flag = 0
     rate.sleep()
-
-
-
 
     #while not rospy.is_shutdown():
 

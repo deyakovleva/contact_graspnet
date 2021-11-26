@@ -198,10 +198,10 @@ def regularize_pc_point_count(pc, npoints, use_farthest_point=False):
       :param use_farthest_point: use farthest point sampling to downsample the points, runs slower.
       :returns: npointsx3 regularized point cloud
     """
-    print('regul')
-    print(pc)
-    print(pc.shape)
-    print(npoints)
+    # print('regul')
+    # print(pc)
+    # print(pc.shape)
+    # print(npoints)
 
     if pc.shape[0] > npoints:
         if use_farthest_point:
@@ -215,10 +215,10 @@ def regularize_pc_point_count(pc, npoints, use_farthest_point=False):
             index = np.random.choice(range(pc.shape[0]), size=required)
             pc = np.concatenate((pc, pc[index, :]), axis=0)
 
-    print('regul after')
-    print(pc)
-    print(pc.shape)
-    print(npoints)
+    # print('regul after')
+    # print(pc)
+    # print(pc.shape)
+    # print(npoints)
 
     return pc
 

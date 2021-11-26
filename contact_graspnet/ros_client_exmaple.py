@@ -131,5 +131,11 @@ if __name__ == '__main__':
         scores[instance_id] = scores_list[indices]
         contact_pts[instance_id] = contact_pts_list[indices]
 
+    # print('scores')
+    # print(scores)
+    # print('pred_grasps_cam')
+    # print(pred_grasps_cam)
+    # print('contact_pts')
+    # print(contact_pts)
     show_image(rgb, None)
     visualize_grasps(pc_full, pred_grasps_cam, scores, plot_opencv_cam=True, pc_colors=pc_colors)
