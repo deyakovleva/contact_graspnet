@@ -15,6 +15,9 @@ from cv_bridge import CvBridge
 
 from sensor_msgs.msg import CameraInfo
 from contact_graspnet_planner.srv import ContactGraspNetPlanner, ContactGraspNetPlannerResponse
+from contact_graspnet_planner.msg import ContactGraspVect
+from contact_graspnet_planner.msg import ContactGrasp
+
 # import glob
 import copy as copy_module
 
@@ -59,20 +62,23 @@ class ImageListener:
         self.flag = 0
         self.camera_matrix_K = None
         self.cv_brdg = CvBridge()
-         
+        self.grasp_msg = ContactGraspVect() 
+
         # initialize a node
         rospy.init_node("sod", log_level=rospy.INFO)
         self.rgb_pub = rospy.Publisher('/rgb', Image, queue_size=10)
+
         self.depth_pub = rospy.Publisher('/depth', Image, queue_size=10)
+
+        # publish grasp position and orientation
+        self.ans = rospy.Publisher('/answer', ContactGraspVect, queue_size=10)
 
         rgb_sub = message_filters.Subscriber('/camera/color/image_raw',
                                              Image, queue_size=10)
-
         depth_sub = message_filters.Subscriber('/camera/aligned_depth_to_color/image_raw',
                                                Image, queue_size=10)
         camera_sub = message_filters.Subscriber('/camera/depth/camera_info',
                                                CameraInfo, queue_size=10)
-
         depth_crop_sub = rospy.Subscriber('/depth_masked',
                                                Image, self.callback_dep, queue_size=10)
 
@@ -208,6 +214,30 @@ class ImageListener:
             rospy.loginfo("Get {} grasps from the server.".format(len(self.resp.grasps)))
         except rospy.ServiceException as e:
             rospy.logerr("Service call failed: {}".format(e))
+
+    def make_grasp_msg(self, se3, score, contact_point, ind):
+        msg = ContactGrasp()
+        msg.score = score
+        msg.id = ind
+        msg.contact_point.x = contact_point[0]
+        msg.contact_point.y = contact_point[1]
+        msg.contact_point.z = contact_point[2]
+
+
+        r = R.from_matrix(se3[0:3, 0:3])
+        quat = r.as_quat() # quat shape (4,)
+
+        point = se3[0:3, 3]
+
+        msg.pose.position.x = point[0]
+        msg.pose.position.y = point[1]
+        msg.pose.position.z = point[2]
+        msg.pose.orientation.x = quat[0]
+        msg.pose.orientation.y = quat[1]
+        msg.pose.orientation.z = quat[2]
+        msg.pose.orientation.w = quat[3]
+
+        return msg
     
 
 if __name__ == '__main__':
@@ -230,7 +260,7 @@ if __name__ == '__main__':
 
         if  ((listener.flag==1)&(listener.im_ros!=None)&(listener.depth_ros!=None)):
             # prepare
-            # получить глубину из сообщения
+            # get depth from msg
             # depth_normalized = listener.depthmsg_to_depthnorm(listener.depth)
             # img_16uc1 = listener.cv_brdg.imgmsg_to_cv2(listener.depth_ros, desired_encoding='16UC1')
             # depth_normalized = (img_16uc1.astype(np.float64) / (2**16)).astype(np.float32)
@@ -238,10 +268,10 @@ if __name__ == '__main__':
             # print(depth_normalized)
             # print("depth mean")
             # print(np.mean(depth_normalized))
-            # переведем из рос сообщения в массив
+            # from ros msg to array
             # ros_img_cv = listener.cv_brdg.imgmsg_to_cv2(listener.im_ros,"rgb8")
 
-            # переводим данные в поинт клауд
+            # convert data to point cloud
             pc_full, pc_segments, pc_color = grasp_estimator.extract_point_clouds(
                 depth=listener.depth,
                 K=listener.camera_matrix_K,
@@ -297,19 +327,27 @@ if __name__ == '__main__':
                 pred_grasps_cam[instance_id] = grasp_list[indices]
                 scores[instance_id] = scores_list[indices]
                 contact_pts[instance_id] = contact_pts_list[indices]
-            
-            # print('scores')
-            # print(scores)
-            
+
+            # make ros msg of top 5 highest score grasps (pose,score,contact points, id)
+            for i,k in enumerate(pred_grasps_cam):
+                largest_scores_ind = np.argsort(scores[k])
+                top5 = largest_scores_ind[-5:]
+                for j in range(len(top5)):
+                    listener.grasp_msg.grasps_vect.append(
+                        listener.make_grasp_msg(
+                            pred_grasps_cam[k][top5[j]],
+                            scores[k][top5[j]],
+                            contact_pts[k][top5[j]],
+                            top5[j]
+                            )
+                        )
+
+            listener.ans.publish(listener.grasp_msg)
+            # clear old data
+            listener.grasp_msg = ContactGraspVect()
+
             show_image(listener.im, None)
             visualize_grasps(pc_full, pred_grasps_cam, scores, plot_opencv_cam=True, pc_colors=pc_color)
             listener.flag = 0
     rate.sleep()
-
-    #while not rospy.is_shutdown():
-
-    #listener.start_srv()
-    #rate.sleep()
-    #rospy.spin()
-    
     

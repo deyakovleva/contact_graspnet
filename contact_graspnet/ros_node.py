@@ -60,8 +60,6 @@ def imgmsg_to_cv2(img_msg):
         n_channels = 1
         res = cv2.normalize(img_msg, res, 0, 1, cv2.NORM_MINMAX)
         img_msg = res
-        # print('img msg posle')
-        # print(img_msg)
     elif img_msg.encoding == '8UC1':
         dtype = np.uint8
         n_channels = 1
@@ -156,11 +154,6 @@ class GraspPlannerServer(object):
             skip_border_objects=self.skip_border_objects,
             z_range=self.z_range,
             )
-
-        print('pc from rosnode')
-        print(pc_full)
-        print(pc_segments)
-        print(pc_colors)
 
         #############
         # Gen Grasp #
