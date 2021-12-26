@@ -234,6 +234,8 @@ python tools/create_table_top_scenes.py /path/to/acronym \
 ```
 ## How to use my_node.py
 
+Create conda environment with GPU tensorflow like here https://docs.anaconda.com/anaconda/user-guide/tasks/tensorflow/
+
 Start Grasp Planner Server Node
 ```
 roslaunch contact_graspnet_planner grasp_planner.launch
