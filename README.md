@@ -232,7 +232,26 @@ You can also visualize existing table-top scenes and grasps
 python tools/create_table_top_scenes.py /path/to/acronym \
        --load_existing scene_contacts/000000.npz -vis
 ```
+## How to use my_node.py
 
+Start Grasp Planner Server Node
+```
+roslaunch contact_graspnet_planner grasp_planner.launch
+```
+Start my_node.py
+```
+cd contact_graspnet/
+python3 my_node.py
+```
+Start rviz with aligned_depth_to_color
+```
+roslaunch realsense2_camera rs_aligned_depth.launch
+```
+Call service for grasps generation 
+```
+rosservice call /get_grasps
+```
+Topic /answer prints 5 grasps position, orientation, scores (ascending), contact_points, id. The amount of grasps can be changed in line 334.
 ## Citation
 
 ```
