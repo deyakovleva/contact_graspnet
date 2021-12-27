@@ -3,28 +3,17 @@
 
 ## 1. Prerequisite
 
-### 1.1 Using conda tf-gpu
+### 1.1 Using conda env
 Before using conda download the dev_ros branch only in your ros ws/src and catkin build.
-Then create conda environment:
+
+Create the conda env
 ```
-conda create -n tf-gpu-contact tensorflow-gpu
+conda env create -f contact_graspnet_conda_env.yml
+
+conda install tensorflow-base=2.4.1
+
+conda install pyyaml=5.4.1
 ```
-You may need to download folowing packages in conda environment^
-```
-conda install -c anaconda pyyaml
-
-conda install -c anaconda pillow
-
-conda install -c conda-forge opencv
-
-conda install -c conda-forge trimesh 
-
-conda install -c rmg glibc
-
-conda install -c conda-forge pyrender
-
-```
-
 
 ### 1.2 Troubleshooting
 * Recompile pointnet2 tf_ops:
