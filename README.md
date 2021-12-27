@@ -2,35 +2,29 @@
 > NOTE: This section is a not part of the official document. If your looking for orignal document, go down to find the official contents or go to the [orignal repository](https://github.com/NVlabs/contact_graspnet).
 
 ## 1. Prerequisite
-### 1.1 Install Python Packages
-If you don't use the conda, follow this instuction. Or you can follow original intstuction guide bellow(not tested yet). 
 
-1.1.1 We **highly** recomand you to use [virtual environment](https://virtualenv.pypa.io/en/latest/index.html) for python.
+### 1.1 Using conda tf-gpu
+Before using conda download the dev_ros branch only in your ros ws/src and catkin build.
+Then create conda environment:
+```
+conda create -n tf-gpu-contact tensorflow-gpu
+```
+You may need to download folowing packages in conda environment^
+```
+conda install -c anaconda pyyaml
 
-* Genterate virtual environment on package root dir.
-    ```bash
-    virtualenv -p python3 --system-site-packages venv
-    ```
+conda install -c anaconda pillow
 
-* Activate `virtualenv`
-    ```bash
-    source venv/bin/activate
-    ```
+conda install -c conda-forge opencv
 
-1.1.2 Install required python packages on your `virtualenv`.
-* Tested
-    ```bash
-    tensorflow==2.3.1
-    mayavi==4.7.3
-    PyQt5==5.15.4
-    trimesh==3.9.29
-    pyrender==0.1.45
-    ```
+conda install -c conda-forge trimesh 
 
-* Not tested
-    ```
-    scipy==1.4.1
-    ```
+conda install -c rmg glibc
+
+conda install -c conda-forge pyrender
+
+```
+
 
 ### 1.2 Troubleshooting
 * Recompile pointnet2 tf_ops:
@@ -39,7 +33,12 @@ sh compile_pointnet_tfops.sh
 ```
 
 ## 2. Download Models and Data
-Find instuction on the official documents bellow.
+Model
+
+Download trained models from https://drive.google.com/drive/folders/1tBHKf60K8DLM5arm-Chyf7jxkzOr5zGl and copy them into the checkpoints/ folder.
+Test data
+
+Download the test data from https://drive.google.com/drive/folders/1v0_QMTUIEOcu09Int5V6N2Nuq7UCtuAA and copy them them into the test_data/ folder.
 
 ## 3. ROS Server Interface
 ### 3.1 grasp_planner ([ContactGraspNetPlanner](./srv/ContactGraspNetPlanner.srv))
