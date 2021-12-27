@@ -76,14 +76,8 @@ Download the test data from https://drive.google.com/drive/folders/1v0_QMTUIEOcu
 ```bash
 roslaunch contact_graspnet_planner grasp_planner.launch
 ```
-### 4.2 Example Client Node
-```bash
-python contact_graspnet/ros_client_exmaple.py --ckpt_dir checkpoints/scene_test_2048_bs3_hor_sigma_001 --np_path test_data/7.npy
-```
 
-### 4.3 How to use my_node.py
-
-Create conda environment with GPU tensorflow like here https://docs.anaconda.com/anaconda/user-guide/tasks/tensorflow/
+### 4.2 How to use my_node.py
 
 Start Grasp Planner Server Node
 ```
