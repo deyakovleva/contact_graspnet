@@ -72,12 +72,7 @@ Download the test data from https://drive.google.com/drive/folders/1v0_QMTUIEOcu
     * Default: 0
 
 ## 4. Launch ROS node
-### 4.1 Grasp Planner Server Node
-```bash
-roslaunch contact_graspnet_planner grasp_planner.launch
-```
-
-### 4.2 How to use my_node.py
+### 4.1 How to use my_node.py
 
 Start Grasp Planner Server Node
 ```
