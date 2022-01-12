@@ -90,12 +90,12 @@ Start Grasp Planner Server Node
 ```
 roslaunch contact_graspnet_planner grasp_planner.launch
 ```
-Change path to global_config in ([253 line](https://github.com/deyakovleva/contact_graspnet/blob/98414515eca649a3ddb07a22f375ce0e51f4dda4/contact_graspnet/my_node.py#L253)) in my_node.py. Start my_node.py
+Change path to global_config in [253 line](https://github.com/deyakovleva/contact_graspnet/blob/98414515eca649a3ddb07a22f375ce0e51f4dda4/contact_graspnet/my_node.py#L253) in my_node.py. Start my_node.py
 ```
 cd contact_graspnet/
 python3 my_node.py
 ```
-In ([line 210](https://github.com/deyakovleva/contact_graspnet/blob/98414515eca649a3ddb07a22f375ce0e51f4dda4/contact_graspnet/my_node.py#L210)) the argument can be changed (depth_ros - for full depth image and depth_crp_ros - for cropped depth image)
+In [line 210](https://github.com/deyakovleva/contact_graspnet/blob/98414515eca649a3ddb07a22f375ce0e51f4dda4/contact_graspnet/my_node.py#L210) the argument can be changed (depth_ros - for full depth image and depth_crp_ros - for cropped depth image)
 
 Start rviz with aligned_depth_to_color
 ```
@@ -105,7 +105,7 @@ Call service for grasps generation
 ```
 rosservice call /get_grasps
 ```
-Topic /answer prints 5 grasps position, orientation, scores (ascending), contact_points, id. The amount of grasps can be changed in ([line 334](https://github.com/deyakovleva/contact_graspnet/blob/98414515eca649a3ddb07a22f375ce0e51f4dda4/contact_graspnet/my_node.py#L334)).
+Topic /answer prints 5 grasps position, orientation, scores (ascending), contact_points, id. The amount of grasps can be changed in [line 334](https://github.com/deyakovleva/contact_graspnet/blob/98414515eca649a3ddb07a22f375ce0e51f4dda4/contact_graspnet/my_node.py#L334).
 ## Citation
 
 ```
