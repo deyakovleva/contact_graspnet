@@ -59,6 +59,7 @@ add_message_files(
 add_service_files(
   FILES
   ContactGraspNetPlanner.srv
+  ContactGraspNetAnswer.srv
 )
 
 ## Generate actions in the 'action' folder
