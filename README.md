@@ -103,7 +103,7 @@ roslaunch realsense2_camera rs_aligned_depth.launch
 ```
 Call service for grasps generation 
 ```
-rosservice call /get_grasps
+rosservice call /responce "{}"
 ```
 Topic /answer prints 5 grasps position, orientation, scores (ascending), contact_points, id. The amount of grasps can be changed in [line 334](https://github.com/deyakovleva/contact_graspnet/blob/98414515eca649a3ddb07a22f375ce0e51f4dda4/contact_graspnet/my_node.py#L334).
 ## Citation
