@@ -106,19 +106,12 @@ def visualize_grasps(full_pc, pred_grasps_cam, scores, plot_opencv_cam=False, pc
 
                 # sorting scores (ascending)
                 largest_scores_ind = np.argsort(scores[k])
-                rslt = largest_scores_ind[-5 : ]
-                # drawing 5 best grasps
 
-                draw_grasps([pred_grasps_cam[k][rslt[4]]], np.eye(4), color=colors2[k], 
-                             gripper_openings=[gripper_openings_k[rslt[4]]], tube_radius=0.0025)
-                draw_grasps([pred_grasps_cam[k][rslt[3]]], np.eye(4), color=colors2[k], 
-                             gripper_openings=[gripper_openings_k[rslt[3]]], tube_radius=0.0025)
-                draw_grasps([pred_grasps_cam[k][rslt[2]]], np.eye(4), color=colors2[k], 
-                             gripper_openings=[gripper_openings_k[rslt[2]]], tube_radius=0.0025)
-                draw_grasps([pred_grasps_cam[k][rslt[1]]], np.eye(4), color=colors2[k], 
-                             gripper_openings=[gripper_openings_k[rslt[1]]], tube_radius=0.0025)
-                draw_grasps([pred_grasps_cam[k][rslt[0]]], np.eye(4), color=colors2[k], 
-                             gripper_openings=[gripper_openings_k[rslt[0]]], tube_radius=0.0025)
+                rslt = largest_scores_ind[-5:] if len(scores[k]) >= 5 else largest_scores_ind[-1:]
+
+                # drawing 5 best grasps
+                for j in range(len(rslt)):
+                    draw_grasps([pred_grasps_cam[k][rslt[j]]], np.eye(4), color=colors2[k], gripper_openings=[gripper_openings_k[rslt[j]]], tube_radius=0.0025)
             else:
                 colors3 = [cm2(0.5*score)[:3] for score in scores[k]]
                 draw_grasps(pred_grasps_cam[k], np.eye(4), colors=colors3, gripper_openings=gripper_openings_k)    
