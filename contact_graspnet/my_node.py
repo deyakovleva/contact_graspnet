@@ -96,63 +96,70 @@ class ImageListener:
 	def responce_srv (self,request):
 		self.start_srv()
 
-		if  ( (self.im_ros!=None) and (self.depth_ros!=None) and (self.depth.size != 0) ):
-			contact_pts = {}
-			id_list = []
-			grasp_list = []
-			scores_list = []
-			contact_pts_list = []
-			for grasp in self.resp.grasps:
-				instance_id = grasp.id
-				pose_msg = grasp.pose
-				score = grasp.score
-				contact_pt_msg = grasp.contact_point
+		if (len(self.resp.grasps) == 0):
+			rospy.logerr('No candidates generated')
+			self.flag = 0
+			return ContactGraspNetAnswerResponse (success = True, grasps = [])
+		else:
 
-				# get transform matrix
-				tf_mat = np.zeros((4, 4), dtype=np.float64)
-				quat = [pose_msg.orientation.x, pose_msg.orientation.y, pose_msg.orientation.z, pose_msg.orientation.w]
-				rot_mat = R.from_quat(quat)
-				tf_mat[0:3, 0:3] = rot_mat.as_matrix()
-				tf_mat[0, 3] = pose_msg.position.x
-				tf_mat[1, 3] = pose_msg.position.y
-				tf_mat[2, 3] = pose_msg.position.z
+			if  ( (self.im_ros!=None) and (self.depth_ros!=None) and (self.depth.size != 0) ):
+				contact_pts = {}
+				id_list = []
+				grasp_list = []
+				scores_list = []
+				contact_pts_list = []
+				for grasp in self.resp.grasps:
+					instance_id = grasp.id
+					pose_msg = grasp.pose
+					score = grasp.score
+					contact_pt_msg = grasp.contact_point
 
-				# get contact point as numpy
-				contact_pt = np.array([contact_pt_msg.x, contact_pt_msg.y, contact_pt_msg.z])
+					# get transform matrix
+					tf_mat = np.zeros((4, 4), dtype=np.float64)
+					quat = [pose_msg.orientation.x, pose_msg.orientation.y, pose_msg.orientation.z, pose_msg.orientation.w]
+					rot_mat = R.from_quat(quat)
+					tf_mat[0:3, 0:3] = rot_mat.as_matrix()
+					tf_mat[0, 3] = pose_msg.position.x
+					tf_mat[1, 3] = pose_msg.position.y
+					tf_mat[2, 3] = pose_msg.position.z
 
-				# append to list
-				id_list.append(instance_id)
-				grasp_list.append(tf_mat)
-				scores_list.append(score)
-				contact_pts_list.append(contact_pt)
+					# get contact point as numpy
+					contact_pt = np.array([contact_pt_msg.x, contact_pt_msg.y, contact_pt_msg.z])
 
-				# convert list to numpy array
-			id_list = np.array(id_list)
-			grasp_list = np.array(grasp_list)
-			scores_list = np.array(scores_list)
-			contact_pts_list = np.array(contact_pts_list)
+					# append to list
+					id_list.append(instance_id)
+					grasp_list.append(tf_mat)
+					scores_list.append(score)
+					contact_pts_list.append(contact_pt)
 
-			# put on the dictionary
-			for instance_id in id_list:
-				indices = np.where(id_list == instance_id)[0]
-				self.pred_grasps_cam[instance_id] = grasp_list[indices]
-				self.scores[instance_id] = scores_list[indices]
-				contact_pts[instance_id] = contact_pts_list[indices]
+					# convert list to numpy array
+				id_list = np.array(id_list)
+				grasp_list = np.array(grasp_list)
+				scores_list = np.array(scores_list)
+				contact_pts_list = np.array(contact_pts_list)
 
-				# make ros msg of top 5 highest score grasps (pose,score,contact points, id)
-			for i,k in enumerate(self.pred_grasps_cam):
-				largest_scores_ind = np.argsort(self.scores[k])
-				top5 = largest_scores_ind[-5:]
-				for j in range(len(top5)):
-					self.grasp_msg.grasps_vect.append(
-						self.make_grasp_msg(
-							self.pred_grasps_cam[k][top5[j]],
-							self.scores[k][top5[j]],
-							contact_pts[k][top5[j]],
-							top5[j]
-							)
-							)
-			self.flag = 1
+				# put on the dictionary
+				for instance_id in id_list:
+					indices = np.where(id_list == instance_id)[0]
+					self.pred_grasps_cam[instance_id] = grasp_list[indices]
+					self.scores[instance_id] = scores_list[indices]
+					contact_pts[instance_id] = contact_pts_list[indices]
+
+					# make ros msg of top 5 highest score grasps (pose,score,contact points, id)
+
+				for i,k in enumerate(self.pred_grasps_cam):
+					largest_scores_ind = np.argsort(self.scores[k])
+					top5 = largest_scores_ind[-5:] if len(self.resp.grasps) >= 5 else largest_scores_ind[-1:]
+					for j in range(len(top5)):
+						self.grasp_msg.grasps_vect.append(
+							self.make_grasp_msg(
+								self.pred_grasps_cam[k][top5[j]],
+								self.scores[k][top5[j]],
+								contact_pts[k][top5[j]],
+								top5[j]
+								)
+								)
+				self.flag = 1
 
 			return ContactGraspNetAnswerResponse (success = True, grasps = self.grasp_msg.grasps_vect)
 
