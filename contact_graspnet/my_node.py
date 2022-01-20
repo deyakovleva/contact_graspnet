@@ -67,8 +67,8 @@ class ImageListener:
         self.scores = {}
         self.pc_color = None
         global_config = config_utils.load_config(
-        '../checkpoints/scene_test_2048_bs3_hor_sigma_001/config.yaml', batch_size=1, arg_configs=[]
-    )
+            '../checkpoints/scene_test_2048_bs3_hor_sigma_001/config.yaml', batch_size=1, arg_configs=[]
+        )
         self.grasp_estimator = GraspEstimator(global_config)
 
         # initialize a node
@@ -81,7 +81,6 @@ class ImageListener:
 
         response_service = rospy.Service(
             '/response', ContactGraspNetAnswer, self.service_handler)
-
 
     def service_handler(self, request):
 
@@ -121,7 +120,7 @@ class ImageListener:
         if len(resp.grasps) == 0:
             rospy.logerr('No candidates generated')
             self.flag = 0
-            return ContactGraspNetAnswerResponse (success = False, grasps = [])
+            return ContactGraspNetAnswerResponse(success=False, grasps=[])
 
         contact_pts = {}
         id_list = []
@@ -182,13 +181,13 @@ class ImageListener:
                 )
         self.flag = 1
 
-        color_im = self.cv_brdg.imgmsg_to_cv2(color_im)
-        all_depth_im = rospy.wait_for_message('/camera/aligned_depth_to_color/image_raw', Image)
-        all_depth_im = self.cv_brdg.imgmsg_to_cv2(all_depth_im)
+        # color_im = self.cv_brdg.imgmsg_to_cv2(color_im)
+        # all_depth_im = rospy.wait_for_message(
+        #     '/camera/aligned_depth_to_color/image_raw', Image)
+        # all_depth_im = self.cv_brdg.imgmsg_to_cv2(all_depth_im)
 
-
-        # plt.imshow(all_depth_im)
-        # plt.show()
+        # # plt.imshow(all_depth_im)
+        # # plt.show()
 
         # self.pc_full, pc_segments, self.pc_color = self.grasp_estimator.extract_point_clouds(
         #     depth=all_depth_im,
@@ -198,12 +197,11 @@ class ImageListener:
         #     z_range=[0.2, 1.8],
         # )
 
-        # show_image(listener.im, None)
+        # # show_image(listener.im, None)
         # visualize_grasps(self.pc_full, self.pred_grasps_cam,
-        #                     self.scores, plot_opencv_cam=True, pc_colors=self.pc_color)
+        #                  self.scores, plot_opencv_cam=True, pc_colors=self.pc_color)
 
         return ContactGraspNetAnswerResponse(success=True, grasps=self.grasp_msg.grasps_vect)
-
 
     def make_grasp_msg(self, se3, score, contact_point, ind):
         msg = ContactGrasp()
@@ -233,10 +231,8 @@ if __name__ == '__main__':
 
     listener = ImageListener()
     rate = rospy.Rate(100)
-    
-    
-    print('main')
+
+    rospy.loginfo('init complete')
     # print(listener.flag)
 
     rospy.spin()
-
