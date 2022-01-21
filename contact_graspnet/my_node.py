@@ -5,6 +5,7 @@ import os
 import sys
 import argparse
 import cv2
+from debugpy import listen
 
 from data import depth2pc
 
@@ -74,7 +75,7 @@ class ImageListener:
         # initialize a node
         rospy.init_node("grasping_generating", log_level=rospy.INFO)
         self.camera_info_ros = rospy.wait_for_message(
-            '/camera/depth/camera_info', CameraInfo)
+            '/camera/aligned_depth_to_color/camera_info', CameraInfo)
         self.rgb_pub = rospy.Publisher('/rgb', Image, queue_size=10)
 
         self.depth_pub = rospy.Publisher('/depth', Image, queue_size=10)
@@ -84,15 +85,22 @@ class ImageListener:
 
     def service_handler(self, request):
 
-        depth_im = request.depth_masked
         color_im = rospy.wait_for_message('/camera/color/image_raw', Image)
+        depth_im = rospy.wait_for_message('/camera/aligned_depth_to_color/image_raw', Image)
 
-        segmask = copy_module.deepcopy(color_im)
-        segmask.encoding = '8UC1'
-        segmask.height = 1
-        segmask.width = 1
-        segmask.step = 1
-        segmask.data = [1]
+        masked_depth_msg = request.depth_masked
+        masked_depth_im = copy_module.deepcopy(self.cv_brdg.imgmsg_to_cv2(masked_depth_msg))
+        print(masked_depth_im.max())
+        masked_depth_im[masked_depth_im > 0] = 1
+        segmask = self.cv_brdg.cv2_to_imgmsg(masked_depth_im)
+        # segmask = copy_module.deepcopy(color_im)
+        # segmask.encoding = '8SC1'
+        # segmask.height = 1
+        # segmask.width = 1
+        # segmask.step = 1
+        # segmask.data = [-1]
+
+
 
         # request service to server
         # rospy.loginfo('Start grasp_planner_client')
@@ -108,10 +116,10 @@ class ImageListener:
             resp = grasp_planner(
                 color_im,
                 depth_im,
-                # self.depth_ros,
                 self.camera_info_ros,
                 segmask
             )
+            print(resp.grasps[0])
             rospy.loginfo("Get {} grasps from the server.".format(
                 len(resp.grasps)))
         except rospy.ServiceException as e:
@@ -179,27 +187,29 @@ class ImageListener:
                         top5[j]
                     )
                 )
-        self.flag = 1
+        # self.flag = 1
 
-        # color_im = self.cv_brdg.imgmsg_to_cv2(color_im)
-        # all_depth_im = rospy.wait_for_message(
-        #     '/camera/aligned_depth_to_color/image_raw', Image)
-        # all_depth_im = self.cv_brdg.imgmsg_to_cv2(all_depth_im)
 
-        # # plt.imshow(all_depth_im)
-        # # plt.show()
 
-        # self.pc_full, pc_segments, self.pc_color = self.grasp_estimator.extract_point_clouds(
-        #     depth=all_depth_im,
-        #     K=np.array(self.camera_info_ros.K).reshape((3, 3)),
-        #     rgb=color_im,
-        #     skip_border_objects=False,
-        #     z_range=[0.2, 1.8],
-        # )
+        
+
+        # plt.imshow(masked_depth_im)
+        # plt.show()
+
+        self.pc_full, pc_segments, self.pc_color = self.grasp_estimator.extract_point_clouds(
+            depth=self.cv_brdg.imgmsg_to_cv2(depth_im),
+            K=np.array(self.camera_info_ros.K).reshape((3, 3)),
+            rgb=self.cv_brdg.imgmsg_to_cv2(color_im),
+            skip_border_objects=False,
+            z_range=[200, 1800],
+        )
+
+        self.pc_full /= 1000
 
         # # show_image(listener.im, None)
-        # visualize_grasps(self.pc_full, self.pred_grasps_cam,
-        #                  self.scores, plot_opencv_cam=True, pc_colors=self.pc_color)
+        
+
+        self.flag = True
 
         return ContactGraspNetAnswerResponse(success=True, grasps=self.grasp_msg.grasps_vect)
 
@@ -234,5 +244,14 @@ if __name__ == '__main__':
 
     rospy.loginfo('init complete')
     # print(listener.flag)
+    while not rospy.is_shutdown():
+        if listener.flag == True:
+
+
+            visualize_grasps(listener.pc_full, listener.pred_grasps_cam,
+                         listener.scores, plot_opencv_cam=True, pc_colors=listener.pc_color)
+
+            listener.flag = False
+    
 
     rospy.spin()
