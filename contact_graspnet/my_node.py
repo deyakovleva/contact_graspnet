@@ -86,10 +86,12 @@ class ImageListener:
     def service_handler(self, request):
 
         color_im = rospy.wait_for_message('/camera/color/image_raw', Image)
-        depth_im = rospy.wait_for_message('/camera/aligned_depth_to_color/image_raw', Image)
+        depth_im = rospy.wait_for_message(
+            '/camera/aligned_depth_to_color/image_raw', Image)
 
         masked_depth_msg = request.depth_masked
-        masked_depth_im = copy_module.deepcopy(self.cv_brdg.imgmsg_to_cv2(masked_depth_msg))
+        masked_depth_im = copy_module.deepcopy(
+            self.cv_brdg.imgmsg_to_cv2(masked_depth_msg))
         print(masked_depth_im.max())
         masked_depth_im[masked_depth_im > 0] = 1
         segmask = self.cv_brdg.cv2_to_imgmsg(masked_depth_im)
@@ -99,8 +101,6 @@ class ImageListener:
         # segmask.width = 1
         # segmask.step = 1
         # segmask.data = [-1]
-
-
 
         # request service to server
         # rospy.loginfo('Start grasp_planner_client')
@@ -175,6 +175,8 @@ class ImageListener:
             contact_pts[instance_id] = contact_pts_list[indices]
 
             # make ros msg of top 5 highest score grasps (pose,score,contact points, id)
+
+        self.grasp_msg = ContactGraspVect()
         for i, k in enumerate(self.pred_grasps_cam):
             largest_scores_ind = np.argsort(self.scores[k])
             top5 = largest_scores_ind[-5:]
@@ -188,10 +190,6 @@ class ImageListener:
                     )
                 )
         # self.flag = 1
-
-
-
-        
 
         # plt.imshow(masked_depth_im)
         # plt.show()
@@ -207,7 +205,6 @@ class ImageListener:
         self.pc_full /= 1000
 
         # # show_image(listener.im, None)
-        
 
         self.flag = True
 
@@ -247,11 +244,9 @@ if __name__ == '__main__':
     while not rospy.is_shutdown():
         if listener.flag == True:
 
-
             visualize_grasps(listener.pc_full, listener.pred_grasps_cam,
-                         listener.scores, plot_opencv_cam=True, pc_colors=listener.pc_color)
+                             listener.scores, plot_opencv_cam=True, pc_colors=listener.pc_color)
 
             listener.flag = False
-    
 
     rospy.spin()
