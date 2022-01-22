@@ -1,0 +1,6 @@
+<launch>
+    <include file="$(find contact_graspnet_planner)/launch/grasp_planner.launch">
+        <arg name="filter_grasps" value="true"/>
+    </include>
+    <node name="service_wrapper" type="my_node.py" pkg="contact_graspnet_planner"/>
+</launch>

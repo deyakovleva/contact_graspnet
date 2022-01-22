@@ -1,4 +1,4 @@
-#!/home/iiwa/anaconda3/envs/tf-gpu-example/bin/python
+#!/home/server3090/anaconda3/envs/tf-gpu-example/bin/python
 #!/usr/bin/python3
 
 import os
