@@ -155,6 +155,7 @@ class GraspPlannerServer(object):
             z_range=self.z_range,
             )
 
+
         #############
         # Gen Grasp #
         #############

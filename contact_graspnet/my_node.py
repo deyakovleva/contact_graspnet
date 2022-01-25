@@ -89,21 +89,24 @@ class ImageListener:
         depth_im = rospy.wait_for_message(
             '/camera/aligned_depth_to_color/image_raw', Image)
 
-        masked_depth_msg = request.depth_masked
-        masked_depth_im = copy_module.deepcopy(
-            self.cv_brdg.imgmsg_to_cv2(masked_depth_msg))
-        print(masked_depth_im.max())
-        masked_depth_im[masked_depth_im > 0] = 1
-        segmask = self.cv_brdg.cv2_to_imgmsg(masked_depth_im)
-        # segmask = copy_module.deepcopy(color_im)
-        # segmask.encoding = '8SC1'
-        # segmask.height = 1
-        # segmask.width = 1
-        # segmask.step = 1
-        # segmask.data = [-1]
+        masked_msg = request.mask
+        masked_im = copy_module.deepcopy(
+            self.cv_brdg.imgmsg_to_cv2(masked_msg, desired_encoding='8UC1'))
+        masked_im[masked_im > 0] = 1
+
+        segmask = self.cv_brdg.cv2_to_imgmsg(masked_im)
+
+        # depth_im = copy_module.deepcopy(self.cv_brdg.imgmsg_to_cv2(depth_im))
+
+        # depth_im[depth_im > 800] = 0
+        # depth_im /= 1000
+
+        # plt.imshow(depth_im)
+        # plt.show()
+
+        # depth_im = self.cv_brdg.cv2_to_imgmsg(depth_im)
 
         # request service to server
-        # rospy.loginfo('Start grasp_planner_client')
         service_name = 'grasp_planner'
         rospy.loginfo('Wait for the grasp_planner_server')
         rospy.wait_for_service(service_name)
@@ -119,7 +122,7 @@ class ImageListener:
                 self.camera_info_ros,
                 segmask
             )
-            print(resp.grasps[0])
+            # print(resp.grasps[0])
             rospy.loginfo("Get {} grasps from the server.".format(
                 len(resp.grasps)))
         except rospy.ServiceException as e:

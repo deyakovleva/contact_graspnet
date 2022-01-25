@@ -127,7 +127,7 @@ class GraspEstimator:
             
         return filtered_grasp_idcs
 
-    def extract_3d_cam_boxes(self, full_pc, pc_segments, min_size=0.3, max_size=0.6):
+    def extract_3d_cam_boxes(self, full_pc, pc_segments, min_size=0.1, max_size=0.6):
         """
         Extract 3D bounding boxes around the pc_segments for inference to create 
         dense and zoomed-in predictions but still take context into account.
