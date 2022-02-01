@@ -110,21 +110,25 @@ def visualize_grasps(full_pc, pred_grasps_cam, scores, plot_opencv_cam=False, pc
 
             # added ==1, in order to create best grasp for only one segmented obj
             if (len(pred_grasps_cam) > 1 or len(pred_grasps_cam) == 1):
-                draw_grasps(pred_grasps_cam[k], np.eye(
-                    4), color=colors[i], gripper_openings=gripper_openings_k)
-                # for one max grasp
-                # draw_grasps([pred_grasps_cam[k][np.argmax(scores[k])]], np.eye(4), color=colors2[k],
-                #             gripper_openings=[gripper_openings_k[np.argmax(scores[k])]], tube_radius=0.0025)
-
                 # sorting scores (ascending)
                 largest_scores_ind = np.argsort(scores[k])
 
                 rslt = largest_scores_ind[-5:] if len(
                     scores[k]) >= 5 else largest_scores_ind[-1:]
+                draw_grasps(pred_grasps_cam[k][rslt[-5:]], np.eye(
+                    4), color=colors[i], gripper_openings=gripper_openings_k[rslt[-5:]])
+                # for one max grasp
+                # draw_grasps([pred_grasps_cam[k][np.argmax(scores[k])]], np.eye(4), color=colors2[k],
+                #             gripper_openings=[gripper_openings_k[np.argmax(scores[k])]], tube_radius=0.0025)
+
                 # drawing 5 best grasps
-                for j in range(len(rslt))[-5:]:
+                for j in range(len(rslt))[-1:]:
                     draw_grasps([pred_grasps_cam[k][rslt[j]]], np.eye(4), color=colors2[k], gripper_openings=[
                                 gripper_openings_k[rslt[j]]], tube_radius=0.0025)
+                # for j in range(len(rslt))[-1:]:
+                #     draw_grasps([pred_grasps_cam[k][rslt[j]]], np.eye(4), color=(255, 0, 0), gripper_openings=[
+                #                 gripper_openings_k[rslt[j]]], tube_radius=0.0025)
+
             else:
                 colors3 = [cm2(0.5*score)[:3] for score in scores[k]]
                 draw_grasps(pred_grasps_cam[k], np.eye(
