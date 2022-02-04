@@ -19,17 +19,17 @@ source devel/setup.bash
 
 Create the conda env
 ```
-conda env create -f contact_graspnet_conda_env.yml
-
-conda install tensorflow-base=2.4.1
-
-conda install pyyaml=5.4.1
+conda env create -f cgp_env_last.yml
 ```
 
-### 1.2 Troubleshooting
+Troubleshooting
 * Recompile pointnet2 tf_ops:
 ```shell
 sh compile_pointnet_tfops.sh
+```
+Activate conda env
+```
+conda activate contact_graspnet_env
 ```
 
 ## 2. Download Models and Data
