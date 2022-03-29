@@ -1,4 +1,4 @@
-# RISE Contact-GraspNet Test Repository
+# Contact-GraspNet Repository
 > NOTE: This section is a not part of the official document. If your looking for orignal document, go down to find the official contents or go to the [orignal repository](https://github.com/NVlabs/contact_graspnet).
 
 ## 1. Prerequisite
