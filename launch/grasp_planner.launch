@@ -3,7 +3,7 @@
   <!-- Get arguments -->
   <arg name="ckpt_dir" default="$(find contact_graspnet_planner)checkpoints/scene_test_2048_bs3_hor_sigma_001" doc="Log dir [default: checkpoints/scene_test_2048_bs3_hor_sigma_001]" />
   <arg name="z_min" default="0.2" doc="Z min value threshold to crop the input point cloud" />
-  <arg name="z_max" default="1.8" doc="Z max value threshold to crop the input point cloud" />
+  <arg name="z_max" default="1.0" doc="Z max value threshold to crop the input point cloud" />
   <arg name="local_regions" default="False" doc="Crop 3D local regions around given segments." />
   <arg name="filter_grasps" default="False" doc="Filter grasp contacts according to segmap." />
   <arg name="skip_border_objects" default="False" doc="When extracting local_regions, ignore segments at depth map boundary." />

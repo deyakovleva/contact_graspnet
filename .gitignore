@@ -11,3 +11,6 @@ test_data
 
 # Virtualenv
 venv
+
+**/*.so
+**/*.o
